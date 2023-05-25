@@ -80,6 +80,8 @@ const hacerReserva = async(req, res = response) => {
     try {
       const { id } = req.params;
       const { horarios } = req.body;
+
+    
   
       const pista = await Pista.findByIdAndUpdate(
         id,

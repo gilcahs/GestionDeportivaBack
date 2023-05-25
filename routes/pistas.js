@@ -11,6 +11,7 @@ const router = Router();
 
 
 router.get('/', getAllPistas)
+
 router.get('/:id', [
     check('id', 'No es un ID valido').isMongoId(),
     check('id').custom(existePistaPorId),
@@ -40,7 +41,7 @@ router.post('/:id/reserva', [
 
 router.put('/:id/horarios',[
     check('horarios').not().isEmpty(),
-    overlappingHorarios,
+    //overlappingHorarios,
     validarCampos
 ], horariosPut)
 
