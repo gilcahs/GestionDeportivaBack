@@ -2,6 +2,37 @@ const { response } = require("express");
 const { Pista, Reserva } = require("../models/pista");
 
 
+const nodemailer = require('nodemailer');
+
+// Configurar el transporte de correo
+let transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'tucorreo@gmail.com', // reemplaza esto con tu correo
+    pass: 'tucontraseña', // reemplaza esto con tu contraseña
+  },
+});
+
+// Configurar las opciones del correo
+let mailOptions = {
+  from: 'tucorreo@gmail.com', // dirección de correo del remitente
+  to: 'usuario@example.com', // dirección de correo del destinatario, en tu caso sería el correo del usuario
+  subject: 'Confirmación de reserva', // Línea de asunto
+  text: 'Detalles de la reserva', // cuerpo del correo en texto plano
+  html: '<h1>Detalles de la reserva</h1>', // cuerpo del correo en formato HTML
+};
+
+// Enviar el correo
+transporter.sendMail(mailOptions, (error, info) => {
+  if (error) {
+    console.log(error);
+  } else {
+    console.log('Email enviado: ' + info.response);
+  }
+});
+
+
+
 
 const getAllPistas = async (req, res) => {
 
@@ -69,6 +100,27 @@ const hacerReserva = async(req, res = response) => {
       pista.reservas.push(reserva);
       await reserva.save();
       await pista.save();
+
+
+       // Configurar las opciones del correo
+    let mailOptions = {
+      from: 'tucorreo@gmail.com', // dirección de correo del remitente
+      to: usuario, // dirección de correo del destinatario
+      subject: 'Confirmación de reserva', // Línea de asunto
+      text: `Detalles de la reserva: Fecha - ${fecha}, Hora - ${hora}, Pista - ${pista.nombre}`, // cuerpo del correo en texto plano
+      html: `<h1>Detalles de la reserva</h1><p>Fecha: ${fecha}</p><p>Hora: ${hora}</p><p>Pista: ${pista.nombre}</p>`, // cuerpo del correo en formato HTML
+    };
+
+    // Enviar el correo
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email enviado: ' + info.response);
+      }
+    });
+
+    
       return res.send(reserva);
     } catch (error) {
       console.error(error);
