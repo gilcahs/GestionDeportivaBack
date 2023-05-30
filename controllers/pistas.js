@@ -8,28 +8,14 @@ const nodemailer = require('nodemailer');
 let transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'tucorreo@gmail.com', // reemplaza esto con tu correo
-    pass: 'tucontraseña', // reemplaza esto con tu contraseña
+    user: process.env.EMAIL, // reemplaza esto con tu correo
+    pass: process.env.PASSEMAIL, // reemplaza esto con tu contraseña
   },
 });
 
-// Configurar las opciones del correo
-let mailOptions = {
-  from: 'tucorreo@gmail.com', // dirección de correo del remitente
-  to: 'usuario@example.com', // dirección de correo del destinatario, en tu caso sería el correo del usuario
-  subject: 'Confirmación de reserva', // Línea de asunto
-  text: 'Detalles de la reserva', // cuerpo del correo en texto plano
-  html: '<h1>Detalles de la reserva</h1>', // cuerpo del correo en formato HTML
-};
 
-// Enviar el correo
-transporter.sendMail(mailOptions, (error, info) => {
-  if (error) {
-    console.log(error);
-  } else {
-    console.log('Email enviado: ' + info.response);
-  }
-});
+
+
 
 
 
@@ -102,9 +88,9 @@ const hacerReserva = async(req, res = response) => {
       await pista.save();
 
 
-       // Configurar las opciones del correo
+       //Configurar las opciones del correo
     let mailOptions = {
-      from: 'tucorreo@gmail.com', // dirección de correo del remitente
+      from: process.env.EMAIL, // dirección de correo del remitente
       to: usuario, // dirección de correo del destinatario
       subject: 'Confirmación de reserva', // Línea de asunto
       text: `Detalles de la reserva: Fecha - ${fecha}, Hora - ${hora}, Pista - ${pista.nombre}`, // cuerpo del correo en texto plano
