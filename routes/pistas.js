@@ -1,7 +1,7 @@
 const { Router } = require('express');
 
 const { check } = require('express-validator');
-const { pistaPost, hacerReserva, getPistaById, horariosPut, getPistasByDeporte, getPistasDisponibles, getAllPistas } = require('../controllers/pistas');
+const { pistaPost, hacerReserva, getPistaById, horariosPut, getPistasByDeporte, getPistasDisponibles, getAllPistas, deleteReservas, deletePista } = require('../controllers/pistas');
 const { validarReserva } = require('../middlewares/validar-reserva');
 const { validarCampos } = require('../middlewares/validar-campos');
 const { validateHorario, checkPistaName, overlappingHorarios, validarFecha } = require('../middlewares/validar-pistas');
@@ -63,6 +63,22 @@ router.get('/deportes/reservas/:idDeporte',
     ],
     getPistasByDeporte
 );
+
+router.delete('/deletePista/:id', [
+    check('id', 'El ID de la pista es necesario').not().isEmpty(),
+    validarCampos,
+  ], deletePista);
+
+router.post('/deleteReservas', [
+    check('reservas', 'Las reservas son necesarias').not().isEmpty(),
+    check('reservas.*.fecha', 'La fecha es necesaria').not().isEmpty(),
+    check('reservas.*.hora', 'La hora es necesaria').not().isEmpty(),
+    check('reservas.*.usuario', 'El usuario es necesario').not().isEmpty(),
+    check('reservas.*.pista', 'La pista es necesaria').not().isEmpty(),
+    validarCampos,
+  ], deleteReservas);
+
+
 
 
 module.exports = router;

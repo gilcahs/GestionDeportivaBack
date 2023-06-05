@@ -11,6 +11,10 @@ const reservaSchema = Schema({
     type: Schema.Types.ObjectId,
     ref: 'Pista',
     required: true
+  },
+  cancelada: {
+    type: Boolean,
+    default: false
   }
 });
 

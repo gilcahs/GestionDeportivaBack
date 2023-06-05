@@ -179,6 +179,93 @@ const getPistasDisponibles = async (req, res, next) => {
 
 
 
+const deleteReservas = async (req, res) => {
+  const { reservas } = req.body;
+
+  try {
+    for (const reservaObj of reservas) {
+      // Find the reservation in the database
+      const reserva = await Reserva.findById(reservaObj._id);
+      if (!reserva) {
+        continue;  // Skip if the reservation doesn't exist
+      }
+
+      // Mark the reservation as cancelled
+      reserva.cancelada = true;
+      await reserva.save();
+
+      const pista = await Pista.findById(reserva.pista);
+      if (!pista) {
+        continue;  // Skip if the pista doesn't exist
+      }
+
+      // Remove the reservation from the pista's reservas array
+      pista.reservas = pista.reservas.filter(r => r._id.toString() !== reserva._id.toString());
+      await pista.save();
+
+      // Send an email to the user
+      let mailOptions = {
+        from: process.env.EMAIL,
+        to: reserva.usuario,
+        subject: 'Tu reserva ha sido cancelada',
+        text: `Estimado usuario,
+
+Lamentamos informarle que su reserva para el día ${reserva.fecha.toLocaleDateString('es-ES', {day: '2-digit', month: '2-digit', year: 'numeric'})} a las ${reserva.hora} en la pista ${pista.nombre} ha sido cancelada. 
+
+Si tienes alguna duda o pregunta, no dudes en contactarnos.
+
+Atentamente,
+El equipo de [Nombre de tu empresa/servicio]`
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      });
+    }
+
+    res.status(200).json({ message: 'Reservas canceladas, eliminadas de las pistas y correo enviado exitosamente' });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Error al cancelar las reservas, eliminarlas de las pistas y enviar el correo' });
+  }
+};
+
+
+const deletePista = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const pista = await Pista.findById(id);
+    if (!pista) {
+      return res.status(404).json({ error: 'No se encontró la pista' });
+    }
+
+    // Actualizar la propiedad 'cancelada' de todas las reservas asociadas a la pista
+    const reservas = pista.reservas;
+    for (let i = 0; i < reservas.length; i++) {
+      let reserva = await Reserva.findById(reservas[i]._id);
+      reserva.cancelada = true;
+      await reserva.save();
+    }
+
+    // Eliminar la pista
+    await Pista.findByIdAndDelete(id);
+
+    return res.status(200).json({ message: 'Pista eliminada correctamente' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Error al eliminar la pista' });
+  }
+};
+
+
+
+
+
 
   
 
@@ -190,6 +277,8 @@ const getPistasDisponibles = async (req, res, next) => {
     horariosPut,
     getPistasByDeporte,
     getPistasDisponibles,
-    getAllPistas
+    getAllPistas,
+    deleteReservas,
+    deletePista
   }
   
