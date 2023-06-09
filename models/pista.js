@@ -44,11 +44,6 @@ const pistaSchema = Schema({
     required: true
   },
   horariosDisponibles: { type: horarioSchema },
-//   horariosDisponibles: {
-//     type: [String],
-
-//     required: true
-//   },
   reservas: [reservaSchema],
   deporte: {
     type: Schema.Types.ObjectId,

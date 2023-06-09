@@ -1,7 +1,7 @@
 const { Router } = require('express');
 
 const { check } = require('express-validator');
-const { pistaPost, hacerReserva, getPistaById, horariosPut, getPistasByDeporte, getPistasDisponibles, getAllPistas, deleteReservas, deletePista } = require('../controllers/pistas');
+const { pistaPost, hacerReserva, getPistaById, horariosPut, getPistasByDeporte, getPistasDisponibles, getAllPistas, deleteReservas, deletePista, obtenerReservas, eliminarReserva } = require('../controllers/pistas');
 const { validarReserva } = require('../middlewares/validar-reserva');
 const { validarCampos } = require('../middlewares/validar-campos');
 const { validateHorario, checkPistaName, overlappingHorarios, validarFecha } = require('../middlewares/validar-pistas');
@@ -77,6 +77,14 @@ router.post('/deleteReservas', [
     check('reservas.*.pista', 'La pista es necesaria').not().isEmpty(),
     validarCampos,
   ], deleteReservas);
+
+  router.get('/reservas/verReservas/allReservas', obtenerReservas);
+
+  
+router.delete('/reservas/:id',[
+    check('id', 'El id de la reserva es obligatorio').not().isEmpty(),
+    check('id', 'El id de la reserva no es válido').isMongoId()
+], eliminarReserva);
 
 
 

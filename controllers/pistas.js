@@ -262,6 +262,77 @@ const deletePista = async (req, res) => {
   }
 };
 
+const obtenerReservas = async (req, res) => {
+  try {
+    const reservas = await Reserva.find({});  
+    res.status(200).json(reservas);
+  } catch (error) {
+    res.status(500).json({ error: 'Error del servidor al obtener las reservas' });
+  }
+};
+
+const eliminarReserva = async (req, res) => {
+  try {
+    const reserva = await Reserva.findById(req.params.id);
+  
+    if (!reserva) {
+      return res.status(404).json({ message: 'Reserva no encontrada' });
+    }
+  
+    if (!reserva.cancelada && new Date(reserva.fecha) > new Date()) {
+      const pista = await Pista.findById(reserva.pista);
+      if (!pista) {
+        return res.status(404).json({ message: 'Pista no encontrada' });
+      }
+
+      let mailOptions = {
+          from: process.env.EMAIL,
+          to: reserva.usuario,
+          subject: 'Tu reserva ha sido cancelada',
+          text: `Estimado usuario,
+
+  Lamentamos informarle que su reserva para el día ${reserva.fecha.toLocaleDateString('es-ES', {day: '2-digit', month: '2-digit', year: 'numeric'})} a las ${reserva.hora} en la pista ${pista.nombre} ha sido cancelada. 
+
+  Si tienes alguna duda o pregunta, no dudes en contactarnos.
+
+  Atentamente,
+  El equipo de [Nombre de tu empresa/servicio]`
+        };
+
+      try {
+        await transporter.sendMail(mailOptions);
+        console.log('Correo enviado ');
+      } catch (error) {
+        console.error('Error enviando correo: ', error);
+        return res.status(500).json({ message: 'Error enviando correo' });
+      }
+  
+      const updatedPista = await Pista.updateOne(
+        { _id: reserva.pista }, 
+        { $pull: { reservas: reserva._id } }
+      );
+
+      if (!updatedPista) {
+        return res.status(500).json({ message: 'Error eliminando reserva de la pista' });
+      }
+    }
+  
+    const deletedReserva = await Reserva.deleteOne({ _id: req.params.id });
+
+    if (!deletedReserva) {
+      return res.status(500).json({ message: 'Error eliminando reserva' });
+    }
+  
+    return res.status(200).json({ message: 'Reserva eliminada' });
+  } catch (error) {
+    console.error('Error eliminando reserva: ', error);
+    return res.status(500).json({ message: 'Error eliminando reserva' });
+  }
+}
+
+
+
+
 
 
 
@@ -279,6 +350,8 @@ const deletePista = async (req, res) => {
     getPistasDisponibles,
     getAllPistas,
     deleteReservas,
-    deletePista
+    deletePista,
+    obtenerReservas,
+    eliminarReserva
   }
   

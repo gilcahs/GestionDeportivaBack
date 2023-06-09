@@ -1,7 +1,7 @@
 const { Router } = require('express');
 
 const { check } = require('express-validator');
-const { deportePost, deportesGet } = require('../controllers/deportes');
+const { deportePost, deportesGet, eliminarDeporte, actualizarDeporte } = require('../controllers/deportes');
 const { validarCampos } = require('../middlewares/validar-campos');
 const { checkDeporteName } = require('../middlewares/validar-deportes');
 const { validateHorario } = require('../middlewares/validar-pistas');
@@ -15,6 +15,15 @@ router.post('/', [
     checkDeporteName,
     validarCampos
 ], deportePost)
+router.delete('/:id', [
+    check('deporteId', 'El id del deporte es obligatorio').not().isEmpty(),
+    check('deporteId', 'El id del deporte no es válido').isMongoId()
+], eliminarDeporte);
+router.patch('/:id', [
+    check('deporteId', 'El id del deporte es obligatorio').not().isEmpty(),
+    check('deporteId', 'El id del deporte no es válido').isMongoId()
+], actualizarDeporte);
+
 
 
 module.exports = router;
