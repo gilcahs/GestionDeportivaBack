@@ -89,13 +89,29 @@ const hacerReserva = async(req, res = response) => {
 
 
        //Configurar las opciones del correo
-    let mailOptions = {
-      from: process.env.EMAIL, // dirección de correo del remitente
-      to: usuario, // dirección de correo del destinatario
-      subject: 'Confirmación de reserva', // Línea de asunto
-      text: `Detalles de la reserva: Fecha - ${fecha}, Hora - ${hora}, Pista - ${pista.nombre}`, // cuerpo del correo en texto plano
-      html: `<h1>Detalles de la reserva</h1><p>Fecha: ${fecha}</p><p>Hora: ${hora}</p><p>Pista: ${pista.nombre}</p>`, // cuerpo del correo en formato HTML
-    };
+       let mailOptions = {
+        from: process.env.EMAIL, // dirección de correo del remitente
+        to: usuario, // dirección de correo del destinatario
+        subject: 'Confirmación de tu reserva', // Línea de asunto
+        text:`¡Hola, ${usuario}!
+
+        Gracias por tu reserva. Aquí están los detalles de tu reserva:
+        
+        Fecha: ${fecha}
+        Hora: ${hora}
+        Pista: ${pista.nombre}
+       
+        
+        Por favor, llega al menos 10 minutos antes de tu hora reservada para poder prepararte adecuadamente.
+        
+        Si tienes alguna pregunta o necesitas asistencia, no dudes en ponerte en contacto con nosotros.
+        
+        ¡Esperamos verte pronto!
+        
+        Saludos,
+        Gilcas Sport Center`, // cuerpo del correo en formato HTML
+      };
+      
 
     // Enviar el correo
     transporter.sendMail(mailOptions, (error, info) => {
@@ -215,7 +231,7 @@ Lamentamos informarle que su reserva para el día ${reserva.fecha.toLocaleDateSt
 Si tienes alguna duda o pregunta, no dudes en contactarnos.
 
 Atentamente,
-El equipo de [Nombre de tu empresa/servicio]`
+El equipo de Gilcas Sport Center`
       };
 
       transporter.sendMail(mailOptions, (error, info) => {
@@ -312,7 +328,7 @@ const eliminarReserva = async (req, res) => {
   Si tienes alguna duda o pregunta, no dudes en contactarnos.
 
   Atentamente,
-  El equipo de [Nombre de tu empresa/servicio]`
+  El equipo de Gilcas Sport Center`
         };
 
       try {
@@ -323,14 +339,15 @@ const eliminarReserva = async (req, res) => {
         return res.status(500).json({ message: 'Error enviando correo' });
       }
   
-      const updatedPista = await Pista.updateOne(
-        { _id: reserva.pista }, 
-        { $pull: { reservas: reserva._id } }
-      );
+      const index = pista.reservas.findIndex(r => r._id.toString() === reserva._id.toString());
 
-      if (!updatedPista) {
-        return res.status(500).json({ message: 'Error eliminando reserva de la pista' });
-      }
+if (index > -1) {
+  // Elimina la reserva del array
+  pista.reservas.splice(index, 1);
+
+  // Guarda el documento de la pista
+  await pista.save();
+}
     }
   
     const deletedReserva = await Reserva.deleteOne({ _id: req.params.id });
