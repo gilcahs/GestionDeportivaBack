@@ -243,14 +243,30 @@ const deletePista = async (req, res) => {
     if (!pista) {
       return res.status(404).json({ error: 'No se encontró la pista' });
     }
+    console.log(pista);
 
     // Actualizar la propiedad 'cancelada' de todas las reservas asociadas a la pista
     const reservas = pista.reservas;
+    
     for (let i = 0; i < reservas.length; i++) {
-      let reserva = await Reserva.findById(reservas[i]._id);
-      reserva.cancelada = true;
-      await reserva.save();
+      try {
+        console.log(reservas[i]._id.toString());
+        let reserva = await Reserva.findById(reservas[i]._id.toString());
+        if (reserva != null ){
+          console.log(reserva);
+    
+          reserva.cancelada = true;
+          await reserva.save();
+
+        }
+        
+        
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Error al eliminar la reserva' });
+      }
     }
+    
 
     // Eliminar la pista
     await Pista.findByIdAndDelete(id);

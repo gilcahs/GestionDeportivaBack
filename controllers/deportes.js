@@ -39,7 +39,7 @@ const eliminarDeporte = async (req, res) => {
     const { id } = req.params;
   
     if (!id) {
-      return res.status(400).send({ error: 'ID de deporte inválido' });
+      return res.status(400).json({ error: 'ID de deporte inválido' });
     }
   
     try {
@@ -49,12 +49,12 @@ const eliminarDeporte = async (req, res) => {
       const deporte = await Deporte.findByIdAndRemove(id);
   
       if (!deporte) {
-        return res.status(404).send({ error: 'Deporte no encontrado' });
+        return res.status(404).json({ error: 'Deporte no encontrado' });
       }
   
       res.send({ message: 'Deporte y pistas asociadas eliminados con éxito', deporte });
     } catch (err) {
-      res.status(500).send({ error: 'Error del servidor al eliminar el deporte y las pistas asociadas' });
+      res.status(500).json({ error: 'Error del servidor al eliminar el deporte y las pistas asociadas' });
     }
   };
   
@@ -64,18 +64,18 @@ const eliminarDeporte = async (req, res) => {
     const { nombre, icono } = req.body;
   
     if (!id) {
-        return res.status(400).send({ error: 'ID de deporte inválido' });
+        return res.status(400).json({ error: 'ID de deporte inválido' });
       }
   
     if (!nombre && !icono) {
-      return res.status(400).send({ error: 'Debe proporcionar al menos un campo para actualizar' });
+      return res.status(400).json({ error: 'Debe proporcionar al menos un campo para actualizar' });
     }
   
     try {
       const deporte = await Deporte.findByIdAndUpdate(id, { nombre, icono }, { new: true });
   
       if (!deporte) {
-        return res.status(404).send({ error: 'Deporte no encontrado' });
+        return res.status(404).json({ error: 'Deporte no encontrado' });
       }
   
       res.send({ message: 'Deporte actualizado con éxito', deporte });
